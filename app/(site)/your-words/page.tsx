@@ -1,19 +1,203 @@
 'use client';
 
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef } from 'react';
+import html2canvas from 'html2canvas';
 import { useRouter } from 'next/navigation';
 
+const termsAndConditions = [
+  "Be true to your heart, whatever you write.",
+  "Express whatever you have to say, no filter! 😉",
+  "Genuine feedback is appreciated (and adorable).",
+  "No spoilers for our future adventures! 🤫",
+  "May cause excessive smiling and warm fuzzy feelings. Proceed with caution. 🥰",
+];
+
 export default function Page() {
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [message, setMessage] = useState('');
+  const [snapshotTaken, setSnapshotTaken] = useState(false);
+  const messageRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  const handleAcceptTerms = () => {
+    setAcceptedTerms(true);
+  };
+
+  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setMessage(e.target.value);
+    setSnapshotTaken(false);
+  };
+
+  const saveToTextFile = () => {
+    const blob = new Blob([message], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'my-love-message.txt';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleSnapIt = async () => {
+    if (messageRef.current) {
+      setSnapshotTaken(true);
+      const canvas = await html2canvas(messageRef.current, {
+        backgroundColor: null,
+        useCORS: true,
+      });
+      const image = canvas.toDataURL('image/png');
+      
+      // Save as text file
+      saveToTextFile();
+      
+      // For local download of image
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = 'my-love-message.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // For sharing
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            files: [new File([await (await fetch(image)).blob()], 'my-love-message.png', { type: 'image/png' })],
+            title: 'My Love Message',
+            text: 'Check out this special message!',
+          });
+        } catch (error) {
+          console.error('Error sharing:', error);
+          alert('Sharing failed or not supported in your browser.');
+        }
+      } else if (navigator.clipboard) {
+        try {
+          const blob = await (await fetch(image)).blob();
+          const item = new ClipboardItem({'image/png': blob});
+          await navigator.clipboard.write([item]);
+          alert('Image copied to clipboard! You can paste it into Instagram DMs or WhatsApp.');
+        } catch (error) {
+          console.error('Error copying to clipboard:', error);
+          alert('Failed to copy image to clipboard.');
+        }
+      }
+    }
+  };
+
   return (
-    <div className="glass-card p-8 max-w-3xl mx-auto text-center my-8">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="glass-card p-8 max-w-3xl mx-auto text-center my-8"
+    >
       <h1 className="text-4xl font-bold text-gray-800 mb-6">Your Words ✍️</h1>
-      <button
+
+      <AnimatePresence mode="wait">
+        {!acceptedTerms ? (
+          <motion.div
+            key="terms"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Before You Write...</h2>
+            <p className="text-lg text-gray-700 mb-6">Please read these important (and adorable) terms and conditions:</p>
+            <ul className="list-disc list-inside text-left text-gray-600 mb-8 max-w-md mx-auto space-y-2">
+              {termsAndConditions.map((term, index) => (
+                <motion.li
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  {term}
+                </motion.li>
+              ))}
+            </ul>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleAcceptTerms}
+              className="glass-card px-8 py-4 text-rose hover:bg-white/40 transition-colors text-lg font-medium"
+            >
+              I Accept! Let's Write! ✨
+            </motion.button>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="message-input"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Your Heart's Message</h2>
+            <p className="text-lg text-gray-700 mb-6">Pour your thoughts onto this digital parchment:</p>
+            <motion.div
+              className="relative glass-card p-6 min-h-[250px] flex flex-col items-center justify-center mb-8"
+              ref={messageRef}
+              style={{ 
+                backgroundImage: 'linear-gradient(to bottom right, #FDF5E6, #FFEFE0)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                borderRadius: '1.5rem',
+                boxShadow: '0 10px 15px rgba(0,0,0,0.1)',
+              }}
+            >
+              <textarea
+                className="w-full h-full bg-transparent text-gray-800 font-dancing-script text-2xl md:text-3xl
+                           leading-relaxed resize-none outline-none placeholder-gray-500 text-center p-4"
+                placeholder="Write your loving message here..."
+                value={message}
+                onChange={handleMessageChange}
+              />
+              {!message && !snapshotTaken && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                  className="absolute bottom-8 text-sm text-gray-500"
+                >
+                  (Your heartfelt words go here!)
+                </motion.p>
+              )}
+            </motion.div>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleSnapIt}
+              disabled={!message.trim()}
+              className="glass-card px-8 py-4 text-rose hover:bg-white/40 transition-colors text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Snap & Share! 📸
+            </motion.button>
+            
+            {snapshotTaken && (
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-sm text-gray-600 mt-4"
+              >
+                Message saved as text file and image! You can share it on WhatsApp or Instagram DMs.
+              </motion.p>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={() => router.back()}
         className="glass-card px-6 py-2 text-gray-800 mt-8"
       >
         Back
-      </button>
-    </div>
+      </motion.button>
+    </motion.div>
   );
 }
