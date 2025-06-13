@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap');
+
+@layer base {
+  body {
+    @apply antialiased;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/30 backdrop-blur-md rounded-2xl shadow-lg border border-white/20;
+  }
+  
+  .floating-element {
+    @apply animate-float;
+  }
+
+  .burnt-edge {
+    position: relative;
+  }
+  .burnt-edge::before, .burnt-edge::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at top left, transparent 20%, #4a2d1f 21%, transparent 22%) top left / 40px 40px no-repeat,
+                radial-gradient(circle at top right, transparent 20%, #4a2d1f 21%, transparent 22%) top right / 40px 40px no-repeat,
+                radial-gradient(circle at bottom left, transparent 20%, #4a2d1f 21%, transparent 22%) bottom left / 40px 40px no-repeat,
+                radial-gradient(circle at bottom right, transparent 20%, #4a2d1f 21%, transparent 22%) bottom right / 40px 40px no-repeat;
+    z-index: 10;
+  }
+  .burnt-edge::after {
+    background: radial-gradient(circle at top left, transparent 20%, #2e1d15 21%, transparent 22%) top left / 40px 40px no-repeat,
+                radial-gradient(circle at top right, transparent 20%, #2e1d15 21%, transparent 22%) top right / 40px 40px no-repeat,
+                radial-gradient(circle at bottom left, transparent 20%, #2e1d15 21%, transparent 22%) bottom left / 40px 40px no-repeat,
+                radial-gradient(circle at bottom right, transparent 20%, #2e1d15 21%, transparent 22%) bottom right / 40px 40px no-repeat;
+    filter: blur(2px);
+    opacity: 0.8;
+  }
+
+  .uneven-border {
+    border-radius: 50% 10% 40% 10% / 10% 50% 10% 40%;
+  }
+
+  .scrollbar-hide {
+    /* For Webkit-based browsers (Chrome, Safari) */
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    /* For IE, Edge and Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+} 
