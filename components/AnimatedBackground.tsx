@@ -1,6 +1,31 @@
+'use client';
+
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
 const AnimatedBackground = () => {
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    const updateDimensions = () => {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
+
+  if (!isClient) {
+    return null;
+  }
+
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none">
       {/* Gradient overlays */}
@@ -17,20 +42,20 @@ const AnimatedBackground = () => {
           key={i}
           className="absolute w-2 h-2 rounded-full bg-white/30"
           initial={{
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
+            x: Math.random() * dimensions.width,
+            y: Math.random() * dimensions.height,
             scale: Math.random() * 0.5 + 0.5,
           }}
           animate={{
             x: [
-              Math.random() * window.innerWidth,
-              Math.random() * window.innerWidth,
-              Math.random() * window.innerWidth,
+              Math.random() * dimensions.width,
+              Math.random() * dimensions.width,
+              Math.random() * dimensions.width,
             ],
             y: [
-              Math.random() * window.innerHeight,
-              Math.random() * window.innerHeight,
-              Math.random() * window.innerHeight,
+              Math.random() * dimensions.height,
+              Math.random() * dimensions.height,
+              Math.random() * dimensions.height,
             ],
           }}
           transition={{
@@ -47,8 +72,8 @@ const AnimatedBackground = () => {
           key={`heart-${i}`}
           className="absolute text-2xl"
           initial={{
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
+            x: Math.random() * dimensions.width,
+            y: Math.random() * dimensions.height,
             opacity: 0,
           }}
           animate={{
@@ -78,17 +103,17 @@ const AnimatedBackground = () => {
             } 0%, transparent 70%)`,
           }}
           initial={{
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
+            x: Math.random() * dimensions.width,
+            y: Math.random() * dimensions.height,
           }}
           animate={{
             x: [
-              Math.random() * window.innerWidth,
-              Math.random() * window.innerWidth,
+              Math.random() * dimensions.width,
+              Math.random() * dimensions.width,
             ],
             y: [
-              Math.random() * window.innerHeight,
-              Math.random() * window.innerHeight,
+              Math.random() * dimensions.height,
+              Math.random() * dimensions.height,
             ],
           }}
           transition={{
